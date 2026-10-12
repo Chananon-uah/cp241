@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chef's Kitchen Sorter</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        
+        <!-- ปุ่มเปิด Overlay กติกา (มุมขวาบนของกล่อง) -->
+        <button id="rules-btn" class="rules-icon-btn" onclick="openRulesModal()" title="กติการคะแนนและการเล่น">❓ กติกา</button>
+
+        <!-- Screen 1: Start Screen & Difficulty Selection -->
+        <section id="start-screen" class="screen-box">
+            <h1>🍳 Chef's Kitchen</h1>
+            <h2>Recipe Sorter Chaos</h2>
+            <p class="subtitle">เลือกระดับความยากก่อนเริ่มงานเชฟ!</p>
+
+            <div class="difficulty-selection">
+                <label class="diff-card easy active">
+                    <input type="radio" name="difficulty" value="easy" checked>
+                    <div class="diff-title">🟢 ง่าย (Easy)</div>
+                    <div class="diff-desc">⏱️ 60 วินาที | คะแนน 1x</div>
+                </label>
+
+                <label class="diff-card medium">
+                    <input type="radio" name="difficulty" value="medium">
+                    <div class="diff-title">🟡 ปานกลาง (Medium)</div>
+                    <div class="diff-desc">⏱️ 45 วินาที | คะแนน 1.5x</div>
+                </label>
+
+                <label class="diff-card hard">
+                    <input type="radio" name="difficulty" value="hard">
+                    <div class="diff-title">🔴 ยาก (Hard)</div>
+                    <div class="diff-desc">⏱️ 30 วินาที | คะแนน 2x</div>
+                </label>
+            </div>
+
+            <button id="start-btn" class="main-btn" onclick="startGame()">🚀 เริ่มเข้าครัว!</button>
+        </section>
+
+        <!-- Screen 2: Main Game Area -->
+        <section id="game-screen" class="screen-box hidden">
+            <!-- Header: สกอร์ & สถานะเกม -->
+            <header class="game-header">
+                <h1>🍳 Chef's Kitchen: Recipe Sorter Chaos</h1>
+                <div class="stats-bar">
+                    <span>⭐ คะแนน: <strong id="score">0</strong></span>
+                    <span>⏱️ เวลา: <strong id="timer">60</strong>s</span>
+                    <span>🎯 ความยาก: <strong id="diff-label">Medium</strong></span>
+                </div>
+            </header>
+
+            <!-- Instructions Guide -->
+            <div class="instruction-box" id="instruction">
+                คำแนะนำ: มีตั๋วออเดอร์ใหม่เข้ามา (การ์ดสีส้ม) นำไปเสียบแทรกในตำแหน่งที่ถูกต้องเพื่อเรียงลำดับจากน้อยไปมาก!
+            </div>
+
+            <!-- Mode 1: Insertion Sort Area -->
+            <section id="insertion-area" class="mode-section">
+                <h3>🎟️ ตั๋วใหม่ที่ต้องจัดเรียง:</h3>
+                <div id="incoming-ticket-container" class="card-container"></div>
+
+                <h3>📌 ราวแขวนออเดอร์ (ต้องเรียงจากน้อยไปมาก):</h3>
+                <div id="rack-container" class="card-container"></div>
+            </section>
+
+            <!-- Mode 2: Merge Sort Area -->
+            <section id="merge-area" class="mode-section hidden">
+                <div class="conveyor-belts">
+                    <div class="belt">
+                        <h4>สายพาน A (เรียงแล้ว)</h4>
+                        <div id="belt-a" class="card-container"></div>
+                        <button id="btn-pick-a" onclick="pickMergeItem('A')">เลือกชิ้นนี้ (A)</button>
+                    </div>
+                    <div class="belt">
+                        <h4>สายพาน B (เรียงแล้ว)</h4>
+                        <div id="belt-b" class="card-container"></div>
+                        <button id="btn-pick-b" onclick="pickMergeItem('B')">เลือกชิ้นนี้ (B)</button>
+                    </div>
+                </div>
+
+                <h3>🍽️ จานหลักที่กำลังรวมวัตถุดิบ (น้อยไปมาก):</h3>
+                <div id="plate-container" class="card-container"></div>
+            </section>
+        </section>
+
+        <!-- Rules & Scoring Overlay Modal -->
+        <div id="rules-modal" class="modal hidden">
+            <div class="modal-content rules-content">
+                <h2>📜 กติการคะแนนและการเล่น</h2>
+                
+                <div class="rules-body">
+                    <h3>🎮 วิธีการเล่น</h3>
+                    <ul>
+                        <li><strong>โหมด Insertion Sort:</strong> กดปุ่มลูกศร <code>[⬇️]</code> เพื่อแทรกการ์ดสีส้มเข้าตำแหน่งในราวแขวน ให้ตัวเลขเรียงจาก<strong>น้อยไปมาก</strong></li>
+                        <li><strong>โหมด Merge Sort:</strong> เปรียบเทียบใบออเดอร์ใบแรกของสายพาน A และ B แล้วกดเลือกสายพานที่มีค่า<strong>น้อยกว่า</strong>ลงจานหลัก</li>
+                    </ul>
+
+                    <h3>⭐ การคิดคะแนน & บทลงโทษ</h3>
+                    <ul>
+                        <li><strong>Insertion Sort:</strong> วางถูกตำแหน่ง +10 คะแนน</li>
+                        <li><strong>Merge Sort:</strong> เลือกถูกสายพาน +20 คะแนน</li>
+                        <li><strong>โบนัสจบเกม:</strong> รวมสายพานสำเร็จ +50 คะแนน + โบนัสเวลาที่เหลือ</li>
+                        <li><strong>ตอบผิด/เลือกผิด:</strong> ถูกหักเวลา ⏱️ -10 วินาที</li>
+                    </ul>
+
+                    <h3>🎯 ตัวคูณตามระดับความยาก</h3>
+                    <ul>
+                        <li>🟢 <strong>Easy:</strong> เวลา 60 วินาที | คะแนน 1.0x</li>
+                        <li>🟡 <strong>Medium:</strong> เวลา 45 วินาที | คะแนน 1.5x</li>
+                        <li>🔴 <strong>Hard:</strong> เวลา 30 วินาที | คะแนน 2.0x</li>
+                    </ul>
+                </div>
+
+                <button class="main-btn" onclick="closeRulesModal()">เข้าใจแล้ว!</button>
+            </div>
+        </div>
+
+        <!-- Game Overlay -->
+        <div id="game-over-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2 id="modal-title">Game Over!</h2>
+                <p id="modal-message">คะแนนทั้งหมดของคุณ: 0</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
